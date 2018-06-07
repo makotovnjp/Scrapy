@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import os
+import glob
 from scrapy import Spider
 from scrapy.http import Request
 
@@ -10,7 +12,9 @@ def product_info(response, value):
 class BooksSpider(Spider):
     name = 'books'
     allowed_domains = ['books.toscrape.com']
-    start_urls = ['http://books.toscrape.com']
+
+    def __init__(self, category):
+        self.start_urls = [category]
 
     def parse(self, response):
         books = response.xpath('//h3/a/@href').extract()
@@ -38,7 +42,7 @@ class BooksSpider(Spider):
 
         # product information data points
         upc = product_info(response, 'UPC')
-        product_type =  product_info(response, 'Product Type')
+        product_type = product_info(response, 'Product Type')
         price_without_tax = product_info(response, 'Price (excl. tax)')
         price_with_tax = product_info(response, 'Price (incl. tax)')
         tax = product_info(response, 'Tax')
@@ -59,3 +63,7 @@ class BooksSpider(Spider):
             'availability': availability,
             'number_of_reviews': number_of_reviews
         }
+
+    def close(self, reason):
+        csv_file = max(glob.iglob('*.csv'), key=os.path.getctime)
+        os.rename(csv_file, 'foobar.csv')
