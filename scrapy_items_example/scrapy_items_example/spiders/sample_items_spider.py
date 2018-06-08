@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
+from scrapy_items_example.items import ScrapyItemsExampleItem
 
 
 class SampleItemsSpiderSpider(scrapy.Spider):
@@ -8,4 +9,8 @@ class SampleItemsSpiderSpider(scrapy.Spider):
     start_urls = ['http://quotes.toscrape.com/']
 
     def parse(self, response):
-        pass
+        authors = response.xpath('//*[@itemprop="author"]/text()').extract()
+
+        item = ScrapyItemsExampleItem()
+        item['authors'] = authors
+        return item
